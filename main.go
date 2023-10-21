@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -86,11 +87,20 @@ func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 		}
 	}
 
+	// Get the current file's full path.
+	_, currentFilePath, _, _ := runtime.Caller(0)
+
+	// Derive the directory from the full path.
+	currentDir := filepath.Dir(currentFilePath)
+
+	// The program's intended name would typically be the name of the directory.
+	programName := filepath.Base(currentDir)
+
 	logFile := &lumberjack.Logger{
-		Filename:   filepath.Join(logDir, "output.log"),
-		MaxSize:    1, // MB
-		MaxBackups: 3,
-		MaxAge:     28, // Days
+		Filename:   filepath.Join(logDir, programName+".log"),
+		MaxSize:    10, // MB
+		MaxBackups: 10,
+		MaxAge:     7, // Days
 	}
 
 	log.AddHook(&fileHook{
@@ -146,15 +156,12 @@ func (f *customFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 type customFormatterWithColour struct{}
 
 var logrusColors = map[logrus.Level]string{
-	// set TraceLevel to dark grey
 	logrus.TraceLevel: "\x1b[90m", // grey
-	// set DebugLevel to blue
 	logrus.DebugLevel: "\x1b[34m", // blue
 	logrus.InfoLevel:  "\x1b[97m", // white
 	logrus.WarnLevel:  "\x1b[33m", // yellow
 	logrus.ErrorLevel: "\x1b[31m", // red
 	logrus.FatalLevel: "\x1b[35m", // magenta
-	// orange (approximated with bright yellow)
 	logrus.PanicLevel: "\x1b[35m", // magenta
 }
 
