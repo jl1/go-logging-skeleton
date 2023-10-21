@@ -1,0 +1,6 @@
+2023-10-21T08:35:46+01:00 | Info    | log file started
+2023-10-21T08:35:46+01:00 | Info    | entered main
+2023-10-21T08:35:46+01:00 | Debug   | debug message
+2023-10-21T08:35:46+01:00 | Warning | warn message
+2023-10-21T08:35:46+01:00 | Error   | error message
+2023-10-21T08:35:46+01:00 | Fatal   | fatal message
