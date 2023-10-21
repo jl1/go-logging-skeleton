@@ -60,13 +60,13 @@ func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 		}
 	}
 
-	// Get the current file's full path.
+	// get the current file's full path.
 	_, currentFilePath, _, _ := runtime.Caller(0)
 
-	// Derive the directory from the full path.
+	// derive the directory from the full path.
 	currentDir := filepath.Dir(currentFilePath)
 
-	// The program's intended name would typically be the name of the directory.
+	// the program's intended name would typically be the name of the directory.
 	programName := filepath.Base(currentDir)
 
 	logFile := &lumberjack.Logger{
@@ -104,8 +104,6 @@ func (hook *fileHook) Fire(entry *logrus.Entry) error {
 
 type customFormatter struct{}
 
-// var logrusColors = logrus.TextFormatter{}.ForceColors().GetColorMap()
-
 func (f *customFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	formattedTime := entry.Time.Format(time.RFC3339)
 	level := fmt.Sprintf("%-7s", entry.Level)
@@ -115,7 +113,7 @@ func (f *customFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	if debugFlag {
 		caller := ""
 		if entry.Caller != nil {
-			filename := filepath.Base(entry.Caller.File) // Extract only the filename
+			filename := filepath.Base(entry.Caller.File) // extract filename
 			caller = fmt.Sprintf("%s:%d", filename, entry.Caller.Line)
 		}
 		msg = fmt.Sprintf("%s | %s | %16s | %s\n", formattedTime, level, caller, entry.Message)
@@ -153,7 +151,7 @@ func (f *customFormatterWithColour) Format(entry *logrus.Entry) ([]byte, error) 
 
 		caller := ""
 		if entry.Caller != nil {
-			filename := filepath.Base(entry.Caller.File) // Extract only the filename
+			filename := filepath.Base(entry.Caller.File) // extract filename
 			caller = fmt.Sprintf("%s:%d", filename, entry.Caller.Line)
 		}
 
