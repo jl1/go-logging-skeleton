@@ -15,6 +15,7 @@ import (
 
 var verboseFlag bool
 var debugFlag bool
+var log *logrus.Logger
 
 func init() {
 	flag.BoolVar(&verboseFlag, "v", false, "Verbose. Also print messages to stdout")
@@ -31,7 +32,15 @@ func init() {
 
 }
 
-var log *logrus.Logger
+func main() {
+	log.Info("entered main")
+	log.Debug("debug message")
+	log.Trace("trace message")
+	log.Warn("warn message")
+	log.Error("error message")
+	log.Info("leaving main")
+	log.Fatal("fatal message")
+}
 
 func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 
