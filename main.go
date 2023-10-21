@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -18,13 +19,12 @@ var debugFlag bool
 var log *logrus.Logger
 
 func init() {
-	flag.BoolVar(&verboseFlag, "v", false, "Verbose. Also print messages to stdout")
-	flag.BoolVar(&debugFlag, "debug", false, "Set log level to debug")
+	flag.BoolVar(&verboseFlag, "v", false, "verbose output. print info messages to stdout")
+	flag.BoolVar(&debugFlag, "debug", false, "Set log level to trace for file and stdout. Overrides -v")
 	flag.Parse()
 
 	logDir := "./logs/"
 
-	// setup lopgging
 	if err := initLogging(verboseFlag, debugFlag, logDir); err != nil {
 		fmt.Println("failed to setup logging", err)
 	}
@@ -54,30 +54,47 @@ func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 		logrus.WarnLevel,
 	}
 
-	if verboseFlag {
-		stdoutLevels = append(stdoutLevels, logrus.InfoLevel, logrus.DebugLevel, logrus.TraceLevel)
-
+	fileLevels := []logrus.Level{
+		logrus.PanicLevel,
+		logrus.FatalLevel,
+		logrus.ErrorLevel,
+		logrus.WarnLevel,
+		logrus.InfoLevel,
 	}
 
 	if debugFlag {
+		fileLevels = append(fileLevels, logrus.InfoLevel, logrus.DebugLevel, logrus.TraceLevel)
 		stdoutLevels = append(stdoutLevels, logrus.InfoLevel, logrus.DebugLevel, logrus.TraceLevel)
+		log.SetLevel(logrus.TraceLevel)
+	} else if verboseFlag {
+		stdoutLevels = append(stdoutLevels, logrus.InfoLevel)
+		log.SetLevel(logrus.InfoLevel)
 	}
 
-	log.AddHook(&writer.Hook{ // Send logs with level higher than warning to stderr
+	log.SetOutput(io.Discard)
+	log.SetFormatter(new(customFormatter))
+
+	log.AddHook(&writer.Hook{
 		Writer:    os.Stdout,
 		LogLevels: stdoutLevels,
 	})
 
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
 	logFile := &lumberjack.Logger{
-		Filename:   logDir + "/output.log",
+		Filename:   filepath.Join(logDir, "output.log"),
 		MaxSize:    1, // MB
 		MaxBackups: 3,
 		MaxAge:     28, // Days
 	}
 
-	log.AddHook(&writer.Hook{ // Send info and debug logs to stdout
+	log.AddHook(&writer.Hook{
 		Writer:    logFile,
-		LogLevels: logrus.AllLevels,
+		LogLevels: fileLevels,
 	})
 
 	return nil
@@ -103,14 +120,4 @@ func (f *customFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	return []byte(msg), nil
-}
-
-func main() {
-	log.Info("entered main")
-	log.Debug("debug message")
-	log.Trace("trace message")
-	log.Warn("warn message")
-	log.Error("error message")
-	log.Fatal("fatal message")
-	log.Info("leaving main")
 }
