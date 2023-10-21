@@ -87,7 +87,18 @@ func (f *customFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	formattedTime := entry.Time.Format(time.RFC3339)
 	level := fmt.Sprintf("%-7s", entry.Level)
 	level = strings.ToUpper(string(level[0])) + level[1:]
-	msg := fmt.Sprintf("%s | %s | %s\n", formattedTime, level, entry.Message)
+
+	var msg string
+	if debugFlag {
+		caller := ""
+		if entry.Caller != nil {
+			filename := filepath.Base(entry.Caller.File) // Extract only the filename
+			caller = fmt.Sprintf("%s:%d", filename, entry.Caller.Line)
+		}
+		msg = fmt.Sprintf("%s | %s | %16s | %s\n", formattedTime, level, caller, entry.Message)
+	} else {
+		msg = fmt.Sprintf("%s | %s | %s\n", formattedTime, level, entry.Message)
+	}
 
 	return []byte(msg), nil
 }
