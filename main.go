@@ -45,14 +45,7 @@ func main() {
 func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 
 	log = logrus.New()
-	if debugFlag {
-		log.SetLevel(logrus.DebugLevel)
-	} else {
-		log.SetLevel(logrus.InfoLevel)
-	}
-
-	log.SetOutput(io.Discard)
-	log.SetFormatter(new(customFormatter))
+	log.SetReportCaller(true)
 
 	stdoutLevels := []logrus.Level{
 		logrus.PanicLevel,
