@@ -38,7 +38,7 @@ func initLogging(verboseFlag, debugFlag bool, logDir string) error {
 	}
 
 	if debugFlag {
-		fileLevels = append(fileLevels, logrus.InfoLevel, logrus.DebugLevel, logrus.TraceLevel)
+		fileLevels = append(fileLevels, logrus.DebugLevel, logrus.TraceLevel)
 		stdoutLevels = append(stdoutLevels, logrus.InfoLevel, logrus.DebugLevel, logrus.TraceLevel)
 		log.SetLevel(logrus.TraceLevel)
 	} else if verboseFlag {
